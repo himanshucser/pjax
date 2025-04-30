@@ -115,19 +115,6 @@ This function will execute all registered `documentReady` functions after the HT
 
 ## API Documentation
 
-### `AppCache` Class
-
-#### Methods
-
-- `AppCache.set(key, value)`
-  - Save data to session storage.
-- `AppCache.get(key)`
-  - Retrieve data from session storage.
-- `AppCache.remove(key)`
-  - Remove specific data from session storage.
-- `AppCache.clear()`
-  - Clear all cached data.
-
 ### `pjax` Object
 
 #### Methods
