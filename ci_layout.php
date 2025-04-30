@@ -153,6 +153,12 @@ if (isset($_GET['partial']) && $_GET['partial']) {
         <script src="jquery.js"></script>
         <script src="pjax.js"></script>
         <?= $this->renderSection('script') ?>
+        <script>
+            $(document).ready(function() {
+                pjax.init();
+                runDocumentReady();
+            });
+        </script>
     </body>
     </html>
 <?php } ?>

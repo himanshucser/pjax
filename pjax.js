@@ -5,6 +5,22 @@
  * @description Client-side pjax implementation for handling SPA navigation and partial page loads
  */
 /**
+ * Executes all registered document-ready functions.
+ */
+function runDocumentReady() {
+    if (documentReadyFunctions) {
+        let oldDocumentReadyFunctions = documentReadyFunctions;
+        documentReadyFunctions = [];
+        $.each(oldDocumentReadyFunctions, function (index, cb) {
+            try {
+                cb();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    }
+}
+/**
  * AppCache class for storing and retrieving page data in sessionStorage.
  */
 class AppCache {
@@ -210,9 +226,3 @@ const pjax = {
 
     }
 };
-
-/**
- * Initialize pjax when DOM is ready
- * @listens DOMContentLoaded
- */
-$(document).ready(() => pjax.init());

@@ -23,6 +23,12 @@ if (isset($_GET['partial']) && $_GET['partial']) {
         <meta name="keywords" content="{{$metaData['keyword']}}">
         <meta name="description" content="{{$metaData['description']}}">
         <title>@yield('title') | {{config('setting.app_name')}}</title>
+        <script>
+            var documentReadyFunctions = [];
+            function documentReady(fn) {
+                documentReadyFunctions.push(fn);
+            }
+        </script>
     </head>
     <body>
         <!-- Layout wrapper -->
@@ -100,6 +106,12 @@ if (isset($_GET['partial']) && $_GET['partial']) {
 
         <script src="jquery.js"></script>
         <script src="pjax.js"></script>
+        <script>
+            $(document).ready(function() {
+                pjax.init();
+                runDocumentReady();
+            });
+        </script>
     </body>
     </html>
 <?php } ?>

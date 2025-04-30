@@ -1,4 +1,4 @@
-# Easy and Powerful PJAX: Single Page Application (SPA) Library
+# Easy and Powerful PJAX : Single Page Application (SPA) Library
 
 `pjax.js` is a lightweight and efficient library for implementing Single Page Applications (SPA) in Laravel, CodeIgniter, or any PHP-based project. It enables partial page loads and seamless navigation without full-page reloads, enhancing user experience and performance.
 
@@ -84,6 +84,34 @@ Control scroll behavior by setting the `data-pjax-scroll` attribute:
 ```html
 <a href="/example" class="pjax" data-pjax-scroll="false">No Scroll</a>
 ```
+
+
+## Run JavaScript Code After PJAX Updates
+
+### HTML Setup
+
+Add the following script to the header of your HTML file:
+
+```html
+<script>
+    var documentReadyFunctions = [];
+    function documentReady(fn) {
+        documentReadyFunctions.push(fn);
+    }
+</script>
+```
+
+### JavaScript Execution After Content Update
+
+To ensure JavaScript code runs after PJAX updates, include the following function call at the bottom of your view:
+
+```javascript
+documentReady(function(){
+    //add your code here 
+})
+```
+
+This function will execute all registered `documentReady` functions after the HTML content is updated. this is alternative to jquery $(document).ready()
 
 ## API Documentation
 
