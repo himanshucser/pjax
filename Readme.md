@@ -59,7 +59,7 @@ $(document).ready(() => pjax.init());
 Ensure your server can handle partial requests by checking for the `partial` query parameter. For example, in PHP:
 
 ```php
-if (isset($_GET['partial'])) {
+if (isset($_GET['partial']) && isset($_GET['layout']) && $_GET['layout'] == 'main') {   
     include 'partials/content.php';
 }
 ```
