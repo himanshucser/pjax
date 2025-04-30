@@ -1,0 +1,130 @@
+# Easy and Powerful PJAX: Single Page Application (SPA) Library
+
+`pjax.js` is a lightweight and efficient library for implementing Single Page Applications (SPA) in Laravel, CodeIgniter, or any PHP-based project. It enables partial page loads and seamless navigation without full-page reloads, enhancing user experience and performance.
+
+## Features
+
+- **Partial Page Loading**: Load only the required content via AJAX.
+- **Session Storage Caching**: Cache pages for faster navigation.
+- **Dynamic Menu Updates**: Automatically update active menu items based on the current URL.
+- **Customizable**: Easily integrate with Laravel, CodeIgniter, or other PHP frameworks.
+- **Scroll Management**: Control scroll behavior during navigation.
+- **Error Handling**: Graceful handling of unauthorized or error responses.
+
+## Installation
+
+1. Clone or download the repository.
+2. Include `pjax.js` in your project:
+
+```html
+<script src="path/to/pjax.js"></script>
+```
+
+3. Ensure you have jQuery included in your project as `pjax.js` depends on it.
+
+```html
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+```
+
+## Usage
+
+### HTML Setup
+
+Wrap your main content in a container with the ID `main-container`:
+
+```html
+<div id="main-container" data-layout="main">
+    <div id="main-content" data-title="">
+        <!-- Main content goes here -->
+    <div>
+</div>
+```
+
+Add the `pjax` class to your links to enable PJAX navigation:
+
+```html
+<a href="/example" class="pjax">Example Link</a>
+```
+
+### JavaScript Initialization
+
+Initialize `pjax.js` when the DOM is ready:
+
+```javascript
+$(document).ready(() => pjax.init());
+```
+
+### Server-Side Integration
+
+Ensure your server can handle partial requests by checking for the `partial` query parameter. For example, in PHP:
+
+```php
+if (isset($_GET['partial'])) {
+    include 'partials/content.php';
+}
+```
+
+## Rules for PJAX SPA Functionality
+
+- Each link (`<a>` tag) where you want to apply PJAX SPA functionality must include the `pjax` class.
+- The `data-pjax-cache` attribute is optional and should only be used for static pages that need to be cached in the browser.
+
+### Caching
+
+To enable caching for specific links, add the `data-pjax-cache` attribute:
+
+```html
+<a href="/example" class="pjax" data-pjax-cache="true">Cached Link</a>
+```
+
+### Scroll Behavior
+
+Control scroll behavior by setting the `data-pjax-scroll` attribute:
+
+```html
+<a href="/example" class="pjax" data-pjax-scroll="false">No Scroll</a>
+```
+
+## API Documentation
+
+### `AppCache` Class
+
+#### Methods
+
+- `AppCache.set(key, value)`
+  - Save data to session storage.
+- `AppCache.get(key)`
+  - Retrieve data from session storage.
+- `AppCache.remove(key)`
+  - Remove specific data from session storage.
+- `AppCache.clear()`
+  - Clear all cached data.
+
+### `pjax` Object
+
+#### Methods
+
+- `pjax.init()`
+  - Initialize PJAX functionality.
+- `pjax.loadPage(url, cache, scroll)`
+  - Load page content via AJAX.
+- `pjax.updateContent(html)`
+  - Update the main container with new content.
+- `pjax.updateActiveMenuByUrl()`
+  - Update active menu items based on the current URL.
+- `pjax.routeLinks()`
+  - Set up click handlers for PJAX-enabled links.
+
+
+
+## Contributing
+
+Contributions are welcome! Feel free to submit issues or pull requests to improve this library.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Acknowledgments
+
+Special thanks to the open-source community for inspiration and support.
