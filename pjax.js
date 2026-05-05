@@ -4,225 +4,242 @@
  * @property {Array} cache - Cached pages for faster navigation
  * @description Client-side pjax implementation for handling SPA navigation and partial page loads
  */
-/**
- * Executes all registered document-ready functions.
- */
-function runDocumentReady() {
-    if (documentReadyFunctions) {
-        let oldDocumentReadyFunctions = documentReadyFunctions;
-        documentReadyFunctions = [];
-        $.each(oldDocumentReadyFunctions, function (index, cb) {
-            try {
-                cb();
-            } catch (e) {
-                console.error(e);
-            }
-        });
-    }
-}
-/**
- * AppCache class for storing and retrieving page data in sessionStorage.
- */
-class AppCache {
-    static cacheEnabled = true;
-    /**
-     * Encode a key to Base64 format.
-     * @param {string} key - The key to encode.
-     * @returns {string} - The Base64 encoded key.
-     */
-    static encodeKey(key) {
-        return btoa(key.replace($('base').attr('href')));
-    }
-
-    /**
-     * Save data to sessionStorage using an encoded key.
-     * @param {string} key - The key under which data is stored.
-     * @param {string} value - The string value to store.
-     */
-    static set(key, value) {
-        if (!AppCache.cacheEnabled) return false;
-        const encodedKey = this.encodeKey(key);
-        try {
-            sessionStorage.setItem(`cache_${encodedKey}`, value);
-        } catch (e) {
-            AppCache.clear();
-        }
-    }
-
-    static setData(key, data) {
-        if (!AppCache.cacheEnabled) return false;
-        const encodedKey = this.encodeKey(key);
-        try {
-            sessionStorage.setItem(`cache_${encodedKey}`, JSON.stringify(data));
-        } catch (e) {
-            AppCache.clear();
-        }
-    }
-
-    /**
-     * Retrieve data from sessionStorage.
-     * @param {string} key - The key of the stored data.
-     * @returns {string | null} - The retrieved string data or null if not found.
-     */
-    static get(key) {
-        if (!AppCache.cacheEnabled) return false;
-        const encodedKey = this.encodeKey(key);
-        return sessionStorage.getItem(`cache_${encodedKey}`);
-    }
-
-    static getData(key) {
-        if (!AppCache.cacheEnabled) return false;
-        const encodedKey = this.encodeKey(key);
-        let cachedData = sessionStorage.getItem(`cache_${encodedKey}`);
-        return cachedData ? JSON.parse(cachedData) : null;
-    }
-
-    /**
-     * Remove a specific item from sessionStorage.
-     * @param {string} key - The key of the item to remove.
-     */
-    static remove(key) {
-        if (!AppCache.cacheEnabled) return false;
-        const encodedKey = this.encodeKey(key);
-        sessionStorage.removeItem(`cache_${encodedKey}`);
-    }
-
-    /**
-     * Clear all cache data from sessionStorage.
-     */
-    static clear() {
-        sessionStorage.clear();
-    }
-}
 
 const pjax = {
-    /** @type {jQuery} jQuery reference to main container */
-    $mainContainer: null,
-    /**
-     * Load page content via AJAX with partial rendering
-     * @param {string} url - The URL to load content from
-     * @param {boolean} [cache=false] - Whether to cache the page content
-     * @param {boolean} [scroll=true] - Whether to scroll to top
-     */
-    loadPage(url, cache = false, scroll = true) {
-        if(url!=window.location.href){
-            window.history.pushState({}, "", url);
-        }
-        //cache code
-        const cachedPage = AppCache.get(url);
-        if(cachedPage){
-            this.updateContent(cachedPage);
-            if (!scroll) $(window).scrollTop(0);
-            if(cache){return false;}
-        }else{
-            this.$mainContainer.css("min-height", this.$mainContainer.height()).html('<div class="loading-text">Loading...</div>');
-        }
+  /** @type {jQuery} jQuery reference to main container */
+  $mainContainer: null,
+  cacheEnabled: true,
+  cacheStorage: {},
+  maxCacheKeys: 100, // Maximum number of pages to cache to prevent memory leaks
 
-        const ajaxUrl = `${url}${url.includes("?") ? "&" : "?"}partial=1&layout=${this.$mainContainer.data("layout")}`;
-        
-        $.ajax({
-            url: ajaxUrl,
-            method: "GET",
-            success: (response) => {
-                if (response === "unauthorized") {
-                    window.location.reload();
-                } else if (response === "reload" || response.includes("<body")) {
-                    window.location.href = url;
-                } else {
-                    //cache start
-                    if(cachedPage==response){
-                        return false;
-                    }
-                    AppCache.set(url,response);
-                    //cache end
-                    
-                    this.updateContent(response, scroll);
-                    if (!scroll) $(window).scrollTop(0);
-                }
-            },
-            error: (xhr) => {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    this.$mainContainer.html(response.message || "");
-                } catch {
-                    window.location.href = url;
-                }
-            }
-        });
-    },
+  /**
+   * Encode a key to Base64 format safely (supports Unicode).
+   */
+  encodeCacheKey(key) {
+    const baseHref = $("base").attr("href") || "";
+    const normalizedKey = key.replace(baseHref, "");
+    return btoa(encodeURIComponent(normalizedKey));
+  },
 
-    /**
-     * Update content in main container
-     * @param {string} html - The HTML content to update
-     * @param {boolean} scroll - Whether to scroll to top
-     */
-    updateContent(html) {
-        this.$mainContainer.html(html).css("min-height", 0);
-        $("title").text($("#main-content").data("title"));
-        runDocumentReady();
-        this.updateActiveMenuByUrl();
-    },
+  /**
+   * Save string value in cache
+   */
+  setCache(key, value) {
+    if (!this.cacheEnabled) return false;
+    const encodedKey = this.encodeCacheKey(key);
 
-    /**
-     * Update active and open classes on menu based on current URL
-     */
-    updateActiveMenuByUrl() {
-        const currentUrl = window.location.href;
-        // Remove existing active and open classes
-        $(".menu-item").removeClass("active open");
-        // Find menu links matching current URL
-        const matchingLinks = $(".menu-link").filter(function() {
-            return this.href === currentUrl;
-        });
-        if (matchingLinks.length) {
-            matchingLinks.each(function() {
-                const $link = $(this);
-                $link.parent().addClass("active");
-                $link.parents(".menu-item").addClass("open active");
-            });
-        }
-    },
-
-    /**
-     * Set up click handlers for pjax-enabled links
-     */
-    routeLinks() {
-        $(document).on("click", "a.pjax", (e) => {
-            const target = e.currentTarget;
-            const href = target.href;
-            
-            if (!href || href.match(/#|javascript:void|undefined/)) return;
-            if (e.ctrlKey || target.target === "_blank") return window.open(href, "_blank");
-            
-            e.preventDefault();
-            
-            const scroll = target.getAttribute("data-pjax-scroll") !== "false";
-            const cache = target.hasAttribute("data-pjax-cache");
-            
-            this.loadPage(href, cache, scroll);
-            this.updateLinkClass(target);
-        });
-    },
-
-    /**
-     * Update link class for pjax-enabled links
-     * @param {HTMLElement} target - The clicked link element
-     */
-    updateLinkClass(target) {
-        target=$(target);
-        if (target.hasClass("menu-link")) {
-        }
-    },
-
-    /**
-     * Initialize pjax functionality
-     */
-    init() {
-        this.$mainContainer = $("#main-container");
-        if (!this.$mainContainer.length) return console.error("pjax: Main container not found");
-
-        this.routeLinks();
-        window.addEventListener("popstate", () => this.loadPage(window.location.href));
-
+    // Simple cleanup to prevent unbounded memory growth
+    const keys = Object.keys(this.cacheStorage);
+    if (keys.length >= this.maxCacheKeys) {
+      delete this.cacheStorage[keys[0]]; // Remove oldest cache entry
     }
+
+    this.cacheStorage[`cache_${encodedKey}`] = value;
+  },
+
+  /**
+   * Save JSON data in cache
+   */
+  setCacheData(key, data) {
+    if (!this.cacheEnabled) return false;
+    this.setCache(key, JSON.stringify(data));
+  },
+
+  /**
+   * Retrieve string data from cache
+   */
+  getCache(key) {
+    if (!this.cacheEnabled) return false;
+    return this.cacheStorage[`cache_${this.encodeCacheKey(key)}`] || null;
+  },
+
+  /**
+   * Retrieve JSON data from cache
+   */
+  getCacheData(key) {
+    if (!this.cacheEnabled) return false;
+    const cachedData = this.getCache(key);
+    try {
+      return cachedData ? JSON.parse(cachedData) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  /**
+   * Remove specific item from cache
+   */
+  removeCache(key) {
+    if (!this.cacheEnabled) return false;
+    delete this.cacheStorage[`cache_${this.encodeCacheKey(key)}`];
+  },
+
+  /**
+   * Clear all cached data
+   */
+  clearCache() {
+    this.cacheStorage = {};
+  },
+
+  /**
+   * Load page content via AJAX with partial rendering
+   * @param {string} url - The URL to load content from
+   * @param {boolean} [cache=false] - Whether to use strict cache (no AJAX revalidation)
+   * @param {boolean} [scroll=true] - Whether to scroll to top
+   */
+  loadPage(url, cache = false, scroll = true) {
+    if (url !== window.location.href) {
+      window.history.pushState({}, "", url);
+    }
+
+    const cachedPage = this.getCache(url);
+
+    if (cachedPage) {
+      this.updateContent(cachedPage);
+      if (scroll) $(window).scrollTop(0); // Fixed scroll logic
+      if (cache) return false;
+    } else {
+      this.$mainContainer
+        .css("min-height", this.$mainContainer.height())
+        .html('<div class="loading-text">Loading...</div>');
+    }
+
+    const ajaxUrl = `${url}${url.includes("?") ? "&" : "?"}partial=1&layout=${this.$mainContainer.data("layout")}`;
+
+    $.ajax({
+      url: ajaxUrl,
+      method: "GET",
+      success: (response) => {
+        if (response === "unauthorized") {
+          window.location.reload();
+        } else if (response === "reload" || response.includes("<body")) {
+          window.location.href = url;
+        } else {
+          if (cachedPage === response) {
+            return false; // Avoid re-rendering if identical
+          }
+
+          this.setCache(url, response);
+          this.updateContent(response);
+
+          // Scroll if not already handled by cache hit
+          if (scroll && !cachedPage) {
+            $(window).scrollTop(0);
+          }
+        }
+      },
+      error: (xhr) => {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          // Used text() instead of html() to prevent XSS attacks
+          this.$mainContainer.text(
+            response.message || "An error occurred while loading the page.",
+          );
+        } catch {
+          window.location.href = url;
+        }
+      },
+    });
+  },
+
+  /**
+   * Update content in main container
+   * @param {string} html - The HTML content to update
+   */
+  updateContent(html) {
+    this.$mainContainer.html(html).css("min-height", 0);
+    $("title").text($("#main-content").data("title"));
+    this.runDocumentReady();
+    this.updateActiveMenuByUrl();
+  },
+
+  /**
+   * Update active and open classes on menu based on current URL
+   */
+  updateActiveMenuByUrl() {
+    const currentUrl = window.location.href;
+    $(".menu-item").removeClass("active open");
+
+    const matchingLinks = $(".menu-link").filter(function () {
+      return this.href === currentUrl;
+    });
+
+    if (matchingLinks.length) {
+      matchingLinks.each(function () {
+        const $link = $(this);
+        $link.parent().addClass("active");
+        $link.parents(".menu-item").addClass("open active");
+      });
+    }
+  },
+
+  /**
+   * Set up click handlers for pjax-enabled links
+   */
+  routeLinks(linkClickCallback) {
+    $(document).on("click", "a.pjax", (e) => {
+      const target = e.currentTarget;
+      const href = target.href;
+
+      // Ignore invalid links and anchors
+      if (!href || href.match(/#|javascript:|undefined/)) return;
+
+      // Let the browser handle specialized clicks natively (new tab/window)
+      if (
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.button !== 0 ||
+        target.target === "_blank"
+      ) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const scroll = target.getAttribute("data-pjax-scroll") !== "false";
+      const cache = target.hasAttribute("data-pjax-cache");
+
+      this.loadPage(href, cache, scroll);
+      if (linkClickCallback) linkClickCallback(target);
+    });
+  },
+
+  /**
+   * Executes all registered document-ready functions.
+   */
+  runDocumentReady() {
+    if (
+      typeof documentReadyFunctions !== "undefined" &&
+      documentReadyFunctions
+    ) {
+      let oldDocumentReadyFunctions = documentReadyFunctions;
+      documentReadyFunctions = [];
+      $.each(oldDocumentReadyFunctions, function (index, cb) {
+        try {
+          cb();
+        } catch (e) {
+          console.error("pjax: Error in document-ready function", e);
+        }
+      });
+    }
+  },
+
+  /**
+   * Initialize pjax functionality
+   */
+  init(linkClickCallback) {
+    this.$mainContainer = $("#main-container");
+    if (!this.$mainContainer.length)
+      return console.error("pjax: Main container not found");
+
+    // Expose runDocumentReady globally
+    window.runDocumentReady = this.runDocumentReady;
+
+    this.routeLinks(linkClickCallback);
+    window.addEventListener("popstate", () =>
+      this.loadPage(window.location.href),
+    );
+    this.runDocumentReady();
+  },
 };

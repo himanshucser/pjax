@@ -34,9 +34,10 @@ Wrap your main content in a container with the ID `main-container`:
 
 ```html
 <div id="main-container" data-layout="main">
-    <div id="main-content" data-title="">
-        <!-- Main content goes here -->
-    <div>
+  <div id="main-content" data-title="">
+    <!-- Main content goes here -->
+    <div></div>
+  </div>
 </div>
 ```
 
@@ -51,7 +52,11 @@ Add the `pjax` class to your links to enable PJAX navigation:
 Initialize `pjax.js` when the DOM is ready:
 
 ```javascript
-$(document).ready(() => pjax.init());
+function onlinkClick(target) {
+  //add your custom code here for example
+  $(target).addClass("active").siblings().removeClass("active");
+}
+$(document).ready(() => pjax.init(onlinkClick));
 ```
 
 ### Server-Side Integration
@@ -59,7 +64,7 @@ $(document).ready(() => pjax.init());
 Ensure your server can handle partial requests by checking for the `partial` query parameter. For example, in PHP:
 
 ```php
-if (isset($_GET['partial']) && isset($_GET['layout']) && $_GET['layout'] == 'main') {   
+if (isset($_GET['partial']) && isset($_GET['layout']) && $_GET['layout'] == 'main') {
     include 'partials/content.php';
 }
 ```
@@ -85,7 +90,6 @@ Control scroll behavior by setting the `data-pjax-scroll` attribute:
 <a href="/example" class="pjax" data-pjax-scroll="false">No Scroll</a>
 ```
 
-
 ## Run JavaScript Code After PJAX Updates
 
 ### HTML Setup
@@ -94,10 +98,10 @@ Add the following script to the header of your HTML file:
 
 ```html
 <script>
-    var documentReadyFunctions = [];
-    function documentReady(fn) {
-        documentReadyFunctions.push(fn);
-    }
+  var documentReadyFunctions = [];
+  function documentReady(fn) {
+    documentReadyFunctions.push(fn);
+  }
 </script>
 ```
 
@@ -106,9 +110,9 @@ Add the following script to the header of your HTML file:
 To ensure JavaScript code runs after PJAX updates, include the following function call at the bottom of your view:
 
 ```javascript
-documentReady(function(){
-    //add your code here 
-})
+documentReady(function () {
+  //add your code here
+});
 ```
 
 This function will execute all registered `documentReady` functions after the HTML content is updated. this is alternative to jquery $(document).ready()
@@ -129,8 +133,6 @@ This function will execute all registered `documentReady` functions after the HT
   - Update active menu items based on the current URL.
 - `pjax.routeLinks()`
   - Set up click handlers for PJAX-enabled links.
-
-
 
 ## Contributing
 

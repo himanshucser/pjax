@@ -107,8 +107,14 @@ if (isset($_GET['partial']) && $_GET['partial']) {
         <script src="jquery.js"></script>
         <script src="pjax.js"></script>
         <script>
+            function onlinkClick(target){
+                target=$(target);
+                if (target.hasClass("menu-link")) {
+                    //target.addClass("active").siblings().removeClass("active");
+                }
+            }
             $(document).ready(function() {
-                pjax.init();
+                pjax.init(onlinkClick);
                 runDocumentReady();
             });
         </script>
