@@ -50,12 +50,21 @@
                         <pre class="bg-light p-3 rounded mb-5"><code>&lt;a href="/example" class="pjax"&gt;Example Link&lt;/a&gt;</code></pre>
 
                         <h4 class="fw-bold mt-4">JavaScript Initialization</h4>
-                        <p>Initialize <code>pjax.js</code> when the DOM is ready:</p>
-                        <pre class="bg-light p-3 rounded mb-5"><code>function onlinkClick(target) {
-  //add your custom code here for example
-  $(target).addClass("active").siblings().removeClass("active");
-}
-$(document).ready(() =&gt; pjax.init(onlinkClick));</code></pre>
+                        <p>Initialize <code>pjax.js</code> when the DOM is ready. You can also define hooks to run custom code during navigation:</p>
+                        <pre class="bg-light p-3 rounded mb-5"><code>$(document).ready(function() {
+  // Hook executed when a PJAX link is clicked
+  pjax.onLinkClick = function() {
+    // e.g., Show a custom loader or update UI
+  };
+
+  // Hook executed after page content is updated
+  pjax.onPageLoaded = function(url) {
+    // e.g., Send pageview to analytics
+    console.log("Successfully loaded: " + url);
+  };
+
+  pjax.init();
+});</code></pre>
 
                         <h4 class="fw-bold mt-4">Server-Side Integration</h4>
                         <p>Ensure your server can handle partial requests by checking for the <code>partial</code> query parameter. For example, in PHP:</p>
@@ -103,6 +112,12 @@ $(document).ready(() =&gt; pjax.init(onlinkClick));</code></pre>
 
                         <h2 class="fw-bold mb-4">API Documentation</h2>
                         
+                        <h4 class="fw-bold mt-4"><code>pjax</code> Hooks</h4>
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item bg-transparent px-0 border-bottom"><strong>pjax.onLinkClick</strong>: Function executed when a PJAX-enabled link is clicked.</li>
+                            <li class="list-group-item bg-transparent px-0 border-bottom"><strong>pjax.onPageLoaded(url)</strong>: Function executed after PJAX successfully loads and updates the page content.</li>
+                        </ul>
+
                         <h4 class="fw-bold mt-4"><code>pjax</code> Object Methods</h4>
                         <ul class="list-group list-group-flush mb-5">
                             <li class="list-group-item bg-transparent px-0 border-bottom"><strong>pjax.init()</strong>: Initialize PJAX functionality.</li>

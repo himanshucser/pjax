@@ -154,15 +154,16 @@ if (isset($_GET['partial']) && $_GET['partial']) {
         <script src="pjax.js"></script>
         <?= $this->renderSection('script') ?>
         <script>
-            function onlinkClick(target){
-                target=$(target);
-                if (target.hasClass("menu-link")) {
-                    //target.addClass("active").siblings().removeClass("active");
-                }
-            }
             $(document).ready(function() {
-                pjax.init(onlinkClick);
-                runDocumentReady();
+                pjax.onLinkClick = function (target) {
+                    target = $(target);
+                    if (target.hasClass("menu-link")) {
+                        // Update active state for Bootstrap nav-links
+                        $(".menu-link").removeClass("active");
+                        target.addClass("active");
+                    }
+                };
+                pjax.init();
             });
         </script>
     </body>

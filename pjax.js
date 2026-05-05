@@ -11,6 +11,8 @@ const pjax = {
   cacheEnabled: true,
   cacheStorage: {},
   maxCacheKeys: 100, // Maximum number of pages to cache to prevent memory leaks
+  onPageLoaded: function (url) { },
+  onLinkClick: function (target) { },
 
   /**
    * Encode a key to Base64 format safely (supports Unicode).
@@ -95,7 +97,7 @@ const pjax = {
     const cachedPage = this.getCache(url);
 
     if (cachedPage) {
-      this.updateContent(cachedPage);
+      this.updateContent(cachedPage,url);
       if (scroll) $(window).scrollTop(0); // Fixed scroll logic
       if (cache) return false;
     } else {
@@ -120,7 +122,7 @@ const pjax = {
           }
 
           this.setCache(url, response);
-          this.updateContent(response);
+          this.updateContent(response,url);
 
           // Scroll if not already handled by cache hit
           if (scroll && !cachedPage) {
@@ -145,38 +147,19 @@ const pjax = {
   /**
    * Update content in main container
    * @param {string} html - The HTML content to update
+   * @param {string} url - The URL of the loaded page
    */
-  updateContent(html) {
+  updateContent(html,url) {
     this.$mainContainer.html(html).css("min-height", 0);
     $("title").text($("#main-content").data("title"));
     this.runDocumentReady();
-    this.updateActiveMenuByUrl();
-  },
-
-  /**
-   * Update active and open classes on menu based on current URL
-   */
-  updateActiveMenuByUrl() {
-    const currentUrl = window.location.href;
-    $(".menu-item").removeClass("active open");
-
-    const matchingLinks = $(".menu-link").filter(function () {
-      return this.href === currentUrl;
-    });
-
-    if (matchingLinks.length) {
-      matchingLinks.each(function () {
-        const $link = $(this);
-        $link.parent().addClass("active");
-        $link.parents(".menu-item").addClass("open active");
-      });
-    }
+    this.onPageLoaded(url);
   },
 
   /**
    * Set up click handlers for pjax-enabled links
    */
-  routeLinks(linkClickCallback) {
+  routeLinks() {
     $(document).on("click", "a.pjax", (e) => {
       const target = e.currentTarget;
       const href = target.href;
@@ -201,7 +184,7 @@ const pjax = {
       const cache = target.hasAttribute("data-pjax-cache");
 
       this.loadPage(href, cache, scroll);
-      if (linkClickCallback) linkClickCallback(target);
+      this.onLinkClick();
     });
   },
 
@@ -228,7 +211,7 @@ const pjax = {
   /**
    * Initialize pjax functionality
    */
-  init(linkClickCallback) {
+  init() {
     this.$mainContainer = $("#main-container");
     if (!this.$mainContainer.length)
       return console.error("pjax: Main container not found");
@@ -236,10 +219,11 @@ const pjax = {
     // Expose runDocumentReady globally
     window.runDocumentReady = this.runDocumentReady;
 
-    this.routeLinks(linkClickCallback);
+    this.routeLinks();
     window.addEventListener("popstate", () =>
       this.loadPage(window.location.href),
     );
     this.runDocumentReady();
+    return this;
   },
 };

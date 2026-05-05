@@ -17,16 +17,20 @@
     <script src="../../pjax.js"></script>
     
     <script>
-        function onlinkClick(target) {
-            target = $(target);
-            if (target.hasClass("menu-link")) {
-                // Update active state for Bootstrap nav-links
-                $(".nav-link").removeClass("active");
-                target.addClass("active");
-            }
-        }
+        
         $(document).ready(function() {
-            pjax.init(onlinkClick);
+            pjax.onLinkClick = function (target) {
+                target = $(target);
+                if (target.hasClass("menu-link")) {
+                    // Update active state for Bootstrap nav-links
+                    $(".menu-link").removeClass("active");
+                    target.addClass("active");
+                }
+            };
+            pjax.onPageLoaded = function (url) {
+                console.log("Page loaded: " + url);
+            };
+            pjax.init();
         });
     </script>
 </body>

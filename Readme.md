@@ -49,14 +49,23 @@ Add the `pjax` class to your links to enable PJAX navigation:
 
 ### JavaScript Initialization
 
-Initialize `pjax.js` when the DOM is ready:
+Initialize `pjax.js` when the DOM is ready. You can also define hooks to run custom code during navigation:
 
 ```javascript
-function onlinkClick(target) {
-  //add your custom code here for example
-  $(target).addClass("active").siblings().removeClass("active");
-}
-$(document).ready(() => pjax.init(onlinkClick));
+$(document).ready(function() {
+  // Hook executed when a PJAX link is clicked
+  pjax.onLinkClick = function() {
+    // e.g., Show a custom loader or update UI
+  };
+
+  // Hook executed after page content is updated
+  pjax.onPageLoaded = function(url) {
+    // e.g., Send pageview to analytics
+    console.log("Successfully loaded: " + url);
+  };
+
+  pjax.init();
+});
 ```
 
 ### Server-Side Integration
@@ -120,6 +129,13 @@ This function will execute all registered `documentReady` functions after the HT
 ## API Documentation
 
 ### `pjax` Object
+
+#### Hooks
+
+- `pjax.onLinkClick`
+  - Function executed when a PJAX-enabled link is clicked.
+- `pjax.onPageLoaded(url)`
+  - Function executed after PJAX successfully loads and updates the page content.
 
 #### Methods
 
