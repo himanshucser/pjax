@@ -184,7 +184,7 @@ const pjax = {
       const cache = target.hasAttribute("data-pjax-cache");
 
       this.loadPage(href, cache, scroll);
-      this.onLinkClick();
+      this.onLinkClick(target);
     });
   },
 

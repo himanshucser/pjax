@@ -54,8 +54,9 @@ Initialize `pjax.js` when the DOM is ready. You can also define hooks to run cus
 ```javascript
 $(document).ready(function() {
   // Hook executed when a PJAX link is clicked
-  pjax.onLinkClick = function() {
+  pjax.onLinkClick = function(target) {
     // e.g., Show a custom loader or update UI
+    $(target).addClass('active').siblings().removeClass('active');
   };
 
   // Hook executed after page content is updated
@@ -132,7 +133,7 @@ This function will execute all registered `documentReady` functions after the HT
 
 #### Hooks
 
-- `pjax.onLinkClick`
+- `pjax.onLinkClick(target)`
   - Function executed when a PJAX-enabled link is clicked.
 - `pjax.onPageLoaded(url)`
   - Function executed after PJAX successfully loads and updates the page content.
