@@ -1,0 +1,40 @@
+{
+  "name": "@softono/pjax",
+  "version": "1.0.0",
+  "description": "Lightweight and powerful PJAX SPA library for Laravel, CodeIgniter, and PHP applications.",
+  "main": "pjax.min.js",
+  "keywords": [
+    "pjax",
+    "spa",
+    "ajax",
+    "single-page-application",
+    "laravel",
+    "codeigniter",
+    "php",
+    "jquery",
+    "softono",
+    "softono pjax"
+  ],
+  "homepage": "https://github.com/softono/pjax",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/softono/pjax.git"
+  },
+  "bugs": {
+    "url": "https://github.com/softono/pjax/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Softono",
+    "url": "https://github.com/softono"
+  },
+  "files": [
+    "pjax.min.js",
+    "pjax.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
