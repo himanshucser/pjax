@@ -10,17 +10,51 @@
 - **Customizable**: Easily integrate with Laravel, CodeIgniter, or other PHP frameworks.
 - **Scroll Management**: Control scroll behavior during navigation.
 - **Error Handling**: Graceful handling of unauthorized or error responses.
-
 ## Installation
 
-1. Clone or download the repository.
-2. Include `pjax.js` in your project:
+### Install via NPM
 
-```html
-<script src="path/to/pjax.js"></script>
+```bash
+npm install @softono/pjax
 ```
 
-3. Ensure you have jQuery included in your project as `pjax.js` depends on it.
+Then include the library in your project:
+
+```javascript
+import "@softono/pjax";
+```
+
+---
+
+### Install via CDN
+
+#### jsDelivr
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@softono/pjax/pjax.min.js"></script>
+```
+
+#### unpkg
+
+```html
+<script src="https://unpkg.com/@softono/pjax/pjax.min.js"></script>
+```
+
+---
+
+### Manual Installation
+
+Clone or download the repository and include `pjax.min.js` in your project:
+
+```html
+<script src="path/to/pjax.min.js"></script>
+```
+
+---
+
+### jQuery Dependency
+
+`pjax.js` depends on jQuery, so ensure jQuery is loaded before `pjax.min.js`.
 
 ```html
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

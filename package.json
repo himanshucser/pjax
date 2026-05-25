@@ -1,8 +1,10 @@
 {
   "name": "@softono/pjax",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Lightweight and powerful PJAX SPA library for Laravel, CodeIgniter, and PHP applications.",
   "main": "pjax.min.js",
+  "jsdelivr": "pjax.min.js",
+  "unpkg": "pjax.min.js",
   "keywords": [
     "pjax",
     "spa",
